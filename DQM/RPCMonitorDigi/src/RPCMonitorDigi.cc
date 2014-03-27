@@ -152,6 +152,9 @@ void RPCMonitorDigi::endLuminosityBlock(edm::LuminosityBlock const& L, edm::Even
 
 
 void RPCMonitorDigi::analyze(const edm::Event& event,const edm::EventSetup& setup ){
+
+  //std::cout<<__LINE__<<std::endl;
+
   dcs_ = true;
   //Check HV status
   this->makeDcsInfo(event);
@@ -162,61 +165,64 @@ void RPCMonitorDigi::analyze(const edm::Event& event,const edm::EventSetup& setu
 
   counter++;
   edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Beginning analyzing event " << counter;
- 
+  //std::cout<<__LINE__<<std::endl;
   //Muons
   edm::Handle<reco::CandidateView> muonCands;
   event.getByLabel(muonLabel_, muonCands);
   std::map<RPCDetId  , std::vector<RPCRecHit> > rechitMuon;
-
+ //std::cout<<__LINE__<<std::endl;
   int  numMuons = 0;
   int  numRPCRecHit = 0 ;
-
-  if(muonCands.isValid()){
-
-    int nStaMuons = muonCands->size();
-    
-    for( int i = 0; i < nStaMuons; i++ ) {
-      
-      const reco::Candidate & goodMuon = (*muonCands)[i];
-      const reco::Muon * muCand = dynamic_cast<const reco::Muon*>(&goodMuon);
-    
-      if(!muCand->isGlobalMuon())continue;
-      if(muCand->pt() < muPtCut_  ||  fabs(muCand->eta())>muEtaCut_) continue;
-      numMuons++;
-      reco::Track muTrack = (*(muCand->outerTrack()));
-      std::vector<TrackingRecHitRef > rpcTrackRecHits;
-      //loop on mu rechits
-      for ( trackingRecHit_iterator it= muTrack.recHitsBegin(); it !=  muTrack.recHitsEnd() ; it++) {
-	if (!(*it)->isValid ())continue;
-	int muSubDetId = (*it)->geographicalId().subdetId();
-	if(muSubDetId == MuonSubdetId::RPC)  {
-	  numRPCRecHit ++;
-	  TrackingRecHit * tkRecHit = (*it)->clone();
-	  RPCRecHit* rpcRecHit = dynamic_cast<RPCRecHit*>(tkRecHit);
-	  int detId = (int)rpcRecHit->rpcId();
-	  if(rechitMuon.find(detId) == rechitMuon.end() || rechitMuon[detId].size() == 0){
-	    std::vector<RPCRecHit>  myVect(1,*rpcRecHit );	  
-	    rechitMuon[detId]= myVect;
-	  }else {
-	    rechitMuon[detId].push_back(*rpcRecHit);
-	  }
+ //std::cout<<__LINE__<<std::endl;
+ if(useMuonDigis_ ){
+   if(muonCands.isValid() ){
+     
+	//std::cout<<__LINE__<<std::endl;
+	int nStaMuons = muonCands->size();
+	
+	for( int i = 0; i < nStaMuons; i++ ) {
+	  
+	  const reco::Candidate & goodMuon = (*muonCands)[i];
+	  const reco::Muon * muCand = dynamic_cast<const reco::Muon*>(&goodMuon);
+	  
+	  if(!muCand->isGlobalMuon())continue;
+	  if(muCand->pt() < muPtCut_  ||  fabs(muCand->eta())>muEtaCut_) continue;
+	  numMuons++;
+	  reco::Track muTrack = (*(muCand->outerTrack()));
+	  std::vector<TrackingRecHitRef > rpcTrackRecHits;
+	  //loop on mu rechits
+	  for ( trackingRecHit_iterator it= muTrack.recHitsBegin(); it !=  muTrack.recHitsEnd() ; it++) {
+	    if (!(*it)->isValid ())continue;
+	    int muSubDetId = (*it)->geographicalId().subdetId();
+	    if(muSubDetId == MuonSubdetId::RPC)  {
+	      numRPCRecHit ++;
+	      TrackingRecHit * tkRecHit = (*it)->clone();
+	      RPCRecHit* rpcRecHit = dynamic_cast<RPCRecHit*>(tkRecHit);
+	      int detId = (int)rpcRecHit->rpcId();
+	      if(rechitMuon.find(detId) == rechitMuon.end() || rechitMuon[detId].size() == 0){
+		std::vector<RPCRecHit>  myVect(1,*rpcRecHit );	  
+		rechitMuon[detId]= myVect;
+	      }else {
+		rechitMuon[detId].push_back(*rpcRecHit);
+	      }
+	    }
+	  }// end loop on mu rechits
+	  
 	}
-      }// end loop on mu rechits
-    
-    }
-
-    if( NumberOfMuon_)  NumberOfMuon_->Fill(numMuons);
-    if( NumberOfRecHitMuon_)  NumberOfRecHitMuon_->Fill( numRPCRecHit);
-    
-  }else{
-    edm::LogError ("rpcmonitordigi") <<"[RPCMonitorDigi]: Muons - Product not valid for event" << counter;
-  }
-  
+	//std::cout<<__LINE__<<std::endl;
+	if( NumberOfMuon_) { NumberOfMuon_->Fill(numMuons);}
+	if( NumberOfRecHitMuon_) { NumberOfRecHitMuon_->Fill( numRPCRecHit);}
+	
+      }else{
+	edm::LogError ("rpcmonitordigi") <<"[RPCMonitorDigi]: Muons - Product not valid for event" << counter;
+      }
+ }
+   //std::cout<<__LINE__<<std::endl;
  //RecHits
   edm::Handle<RPCRecHitCollection> rpcHits;
   event.getByLabel( rpcRecHitLabel_ , rpcHits);
   std::map<RPCDetId  , std::vector<RPCRecHit> > rechitNoise;
-
+ //std::cout<<__LINE__<<std::endl;
   
   if(rpcHits.isValid()){
    
@@ -237,13 +243,13 @@ void RPCMonitorDigi::analyze(const edm::Event& event,const edm::EventSetup& setu
   }else{
     edm::LogError ("rpcmonitordigi") <<"[RPCMonitorDigi]: RPCRecHits - Product not valid for event" << counter;
   }
-
+ //std::cout<<__LINE__<<std::endl;
  
-  if( useMuonDigis_ && muonRPCEvents_ != 0 )  muonRPCEvents_->Fill(1);
-  if( noiseRPCEvents_ != 0)  noiseRPCEvents_->Fill(1);
-
-  if(useMuonDigis_ ) this->performSourceOperation(rechitMuon, muonFolder_);
-  this->performSourceOperation(rechitNoise, noiseFolder_);
+ if( useMuonDigis_ && muonRPCEvents_ != 0 ) { muonRPCEvents_->Fill(1);}
+ if( noiseRPCEvents_ != 0) { noiseRPCEvents_->Fill(1);}
+ //std::cout<<__LINE__<<std::endl;
+ if(useMuonDigis_ ) {this->performSourceOperation(rechitMuon, muonFolder_);}
+ this->performSourceOperation(rechitNoise, noiseFolder_);
 }
 
 
@@ -344,6 +350,8 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
     }else {
       wheelOrDiskType =  "Disk";
       wheelOrDiskNumber = region*(int)detId.station();
+
+      std::cout<<"----------------------------------> "<<wheelOrDiskNumber <<std::endl;
       ring = detId.ring();
     }
 

@@ -283,11 +283,11 @@ void RPCMonitorDigi::bookWheelDiskME(const std::string &recHitType, std::map<std
    for(int ring = RPCMonitorDigi::numberOfInnerRings_  ; ring <= 3 ; ring ++){
      os.str("");
      os<<"1DOccupancy_Ring_"<<ring;
-     meMap[os.str()] = dbe->book1D(os.str(), os.str(), 6 , 0.5, 6.5);
-     for(int xbin= 1 ; xbin<= 6 ; xbin++) {
+     meMap[os.str()] = dbe->book1D(os.str(), os.str(), RPCMonitorDigi::numberOfDisks_ * 2 , 0.5, ((float)RPCMonitorDigi::numberOfDisks_ * 2.0 )+0.5);
+     for(int xbin= 1 ; xbin<= RPCMonitorDigi::numberOfDisks_ * 2 ; xbin++) {
        label.str("");
-       if (xbin < 4) label<<"Disk "<< (xbin - 4);
-       else label<<"Disk "<< (xbin - 3);
+       if (xbin < (RPCMonitorDigi::numberOfDisks_ + 1)) label<<"Disk "<< (xbin - (RPCMonitorDigi::numberOfDisks_ + 1));
+       else label<<"Disk "<< (xbin - RPCMonitorDigi::numberOfDisks_);
        meMap[os.str()] ->setBinLabel(xbin, label.str(), 1); 
      }
    }
