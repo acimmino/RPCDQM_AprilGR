@@ -79,10 +79,7 @@ process.DQMStore.referenceFileName = '/dqmdata/dqm/reference/rpc_reference.root'
 process.load("EventFilter.ScalersRawToDigi.ScalersRawToDigi_cfi")
 
 ############## RPC Unpacker  ####################
-process.rpcunpacker = cms.EDProducer("RPCUnpackingModule",
-    InputLabel = cms.InputTag("source"),
-    doSynchro = cms.bool(False)
-)
+process.load("EventFilter.RPCRawToDigi.rpcUnpacker_cfi")
 
 ################# RPC Rec Hits  #################
 process.load("RecoLocalMuon.RPCRecHit.rpcRecHits_cfi")
