@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 ## Use RECO Muons flag
 useMuons = False
 isOfflineDQM = False
-minNumberRPCEvents = 10000
-minEventClient = 100
+minNumberRPCEvents = 10
+minEventClient = 10
 
 process = cms.Process("RPCDQM")
 
@@ -88,10 +88,10 @@ process.DQMStore.referenceFileName = '/dqmdata/dqm/reference/rpc_reference.root'
 
 ############### Scaler Producer #################
 process.load("EventFilter.ScalersRawToDigi.ScalersRawToDigi_cfi")
-
+process.scalersRawToDigi.scalersInputTag = cms.InputTag("rawDataCollector")
 ############## RPC Unpacker  ####################
 process.load("EventFilter.RPCRawToDigi.rpcUnpacker_cfi")
-
+process.rpcunpacker.InputLabel= cms.InputTag("rawDataCollector")
 ################# RPC Rec Hits  #################
 process.load("RecoLocalMuon.RPCRecHit.rpcRecHits_cfi")
 process.rpcRecHits.rpcDigiLabel = 'rpcunpacker'

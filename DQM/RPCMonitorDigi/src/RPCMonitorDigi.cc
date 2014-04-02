@@ -351,7 +351,7 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
       wheelOrDiskType =  "Disk";
       wheelOrDiskNumber = region*(int)detId.station();
 
-      std::cout<<"----------------------------------> "<<wheelOrDiskNumber <<std::endl;
+      //std::cout<<"----------------------------------> "<<wheelOrDiskNumber <<std::endl;
       ring = detId.ring();
     }
 
